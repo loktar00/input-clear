@@ -1,6 +1,104 @@
 <template>
+    <style>
+        div{
+            border:1px solid silver;
+            display: inline-block;
+        }
+        input {
+            float: left;
+            border:none;
+        }
+
+        input:focus, button:focus{
+            outline:transparent;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            padding:0 2px 0 0;
+            margin:0;
+            background: #fff;
+            position:relative;
+            font-weight: bold;
+
+            opacity: 0;
+            -webkit-transition: opacity 0.3s;
+            -moz-transition: opacity 0.3s;
+            transition: opacity 0.3s;
+        }
+
+        .show-clear{
+            opacity: 1;
+        }
+    </style>
     <div>
         <input type="text" placeholder="value" />
-        <button>x</button>
+        <button>&#10005;</button>
     </div>
 </template>
+<script>
+    (function(window, document, undefined) {
+        // Refers to the "importee"
+        var thisDoc = document._currentScript.ownerDocument;
+
+        // Gets content from <template>
+        var template = thisDoc.querySelector('template').content;
+
+        // Creates an object based in the HTML Element prototype
+        var InputClearProto = Object.create(HTMLElement.prototype);
+        InputClearProto.placeholder = '';
+
+        // Fires when an instance of the element is created
+        InputClearProto.createdCallback = function() {
+
+            var shadowRoot = this.createShadowRoot(),
+                clone = document.importNode(template, true),
+                self = this;
+
+            shadowRoot.appendChild(clone);
+
+            self.input = shadowRoot.querySelector('input'),
+            self.clearButton = shadowRoot.querySelector('button');
+
+            self.input.addEventListener('keyup', function(){
+                if(this.value){
+                    self.clearButton.classList.add('show-clear');
+                }else{
+                    self.clearButton.classList.remove('show-clear');
+                }
+            });
+
+            self.clearButton.addEventListener('click', function(){
+                self.input.value = '';
+                self.clearButton.classList.remove('show-clear');
+            });
+
+
+            if (self.hasAttribute('placeholder')) {
+                var placeholder = self.getAttribute('placeholder');
+                self.setPlaceholder(placeholder);
+            }
+            else {
+                self.setPlaceholder(self.placeholder);
+            }
+
+        };
+
+        // Fires when an attribute was added, removed, or updated
+        InputClearProto.attributeChangedCallback = function(attr, oldVal, newVal) {
+
+        };
+
+        InputClearProto.setPlaceholder = function(val) {
+            this.placeholder = val;
+            this.input.placeholder = this.placeholder;
+        };
+
+        // Registers <input-clear> in the main document
+        window.MyElement = document.registerElement('input-clear', {
+            prototype: InputClearProto
+        });
+
+    })(window, document);
+</script>
+</script>
